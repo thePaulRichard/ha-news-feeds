@@ -1,0 +1,44 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "That feed is already added."
+    },
+    "error": {
+      "invalid_url": "Enter an address starting with http:// or https://.",
+      "cannot_read": "Couldn't read a news feed (RSS or Atom) at that address."
+    },
+    "step": {
+      "user": {
+        "title": "Add a news feed",
+        "description": "One feed per entry: add News again for each source. The headlines show on the News ticker and News feed cards.",
+        "data": {
+          "name": "Name",
+          "url": "Feed address (RSS or Atom)",
+          "prefix": "Emoji before the source (optional)",
+          "items": "Headlines to keep"
+        },
+        "data_description": {
+          "name": "Shown on the cards. Leave empty to use the feed's own title.",
+          "prefix": "For example 🇮🇪 or 🌍"
+        }
+      }
+    }
+  },
+  "options": {
+    "error": {
+      "invalid_url": "Enter an address starting with http:// or https://.",
+      "cannot_read": "Couldn't read a news feed (RSS or Atom) at that address."
+    },
+    "step": {
+      "init": {
+        "title": "Feed settings",
+        "description": "To rename the feed, use Rename in the entry's menu.",
+        "data": {
+          "url": "Feed address (RSS or Atom)",
+          "prefix": "Emoji before the source (optional)",
+          "items": "Headlines to keep"
+        }
+      }
+    }
+  }
+}
