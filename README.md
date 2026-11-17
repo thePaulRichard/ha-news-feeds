@@ -86,3 +86,15 @@ Python packages); feeds over 5 MB are refused.
 
 Copy `custom_components/ha_news` to `/config/custom_components/` and
 restart Home Assistant (or add this repository to HACS).
+
+## Development
+
+```sh
+pip install -r requirements_test.txt
+python -m pytest
+```
+
+The tests run a real Home Assistant (config flow, options, the sensor)
+with fake feeds, so they need no network. GitHub runs them, Home
+Assistant's hassfest and the HACS checks on every push and pull request,
+and every Monday against the newest Home Assistant.

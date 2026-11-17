@@ -1,0 +1,3 @@
+# Tests only: HACS installs custom_components/ha_news, never this.
+# A minimum, not a pin: CI tests against the newest Home Assistant.
+pytest-homeassistant-custom-component>=0.13.375
