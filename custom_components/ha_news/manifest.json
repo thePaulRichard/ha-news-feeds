@@ -1,11 +1,18 @@
 {
   "domain": "ha_news",
   "name": "News",
-  "codeowners": [],
+  "codeowners": [
+    "@thePaulRichard"
+  ],
   "config_flow": true,
-  "dependencies": ["frontend", "http"],
+  "dependencies": [
+    "frontend",
+    "http"
+  ],
+  "documentation": "https://github.com/thePaulRichard/ha-news-feeds",
   "integration_type": "service",
   "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/thePaulRichard/ha-news-feeds/issues",
   "requirements": [],
   "version": "0.1.0"
 }
