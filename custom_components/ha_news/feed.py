@@ -10,6 +10,8 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 from html.parser import HTMLParser
+import re
+import unicodedata
 import xml.etree.ElementTree as ET
 
 MEDIA_NS = "http://search.yahoo.com/mrss/"
@@ -17,8 +19,25 @@ MAX_BYTES = 5 * 1024 * 1024  # bigger than any news feed we know (g1: ~500 KB)
 SUMMARY_CHARS = 300
 
 
+def _fold(text: str) -> str:
+    """Lower case, without accents: "São Paulo" matches "sao paulo"."""
+    text = unicodedata.normalize("NFKD", text)
+    return "".join(c for c in text if not unicodedata.combining(c)).casefold()
+
+
+def keywords(value: str) -> re.Pattern | None:
+    """Comma-separated words or phrases, as one pattern matching any of
+    them as whole words ("ai" doesn't match "rain"). None when empty."""
+    words = {" ".join(_fold(w).split()) for w in (value or "").split(",")}
+    words.discard("")
+    if not words:
+        return None
+    alts = "|".join(re.escape(w) for w in sorted(words, key=len, reverse=True))
+    return re.compile(rf"(?<!\w)(?:{alts})(?!\w)")
+
+
 class FeedError(Exception):
-    """The feed couldn't be read or has no items."""
+    """The feed couldn't be read."""
 
 
 class _Text(HTMLParser):
@@ -115,6 +134,11 @@ def _item(item: ET.Element) -> dict | None:
         return None
 
     title, _ = _html_text(_text(first("title")))
+    # Aggregators (Google News) name the original site in <source> and
+    # repeat it at the end of the title: "Headline - The Verge".
+    source = _text(first("source"))
+    if source and title.endswith(f" - {source}"):
+        title = title[: -len(source) - 3].rstrip()
     if not title:
         return None
 
@@ -148,7 +172,7 @@ def _item(item: ET.Element) -> dict | None:
         for el in kids.get(n, []):
             if el is not body and (img := _html_text("".join(el.itertext()))[1]):
                 break
-    if summary == title:
+    if summary in (title, f"{title} {source}"):  # Google News: title + site
         summary = ""
     if len(summary) > SUMMARY_CHARS:
         summary = summary[: SUMMARY_CHARS - 1].rstrip() + "…"
@@ -163,8 +187,16 @@ def _item(item: ET.Element) -> dict | None:
     }
 
 
-def parse(data: bytes, limit: int) -> tuple[str, list[dict]]:
-    """The feed's own title and its newest `limit` items."""
+def parse(
+    data: bytes,
+    limit: int,
+    include: re.Pattern | None = None,
+    exclude: re.Pattern | None = None,
+) -> tuple[str, list[dict]]:
+    """The feed's own title and its newest `limit` items, keeping only
+    those whose title or summary matches `include` (when given) and not
+    `exclude`, and skipping repeated titles. Raises FeedError when the
+    data isn't a feed; a feed with no (matching) items gives []."""
     try:
         root = ET.fromstring(data)
     except ET.ParseError as err:
@@ -175,12 +207,29 @@ def parse(data: bytes, limit: int) -> tuple[str, list[dict]]:
             t = next((c for c in el if _local(c.tag) == "title"), None)
             title = _text(t)
             break
+    else:
+        raise FeedError("not an RSS or Atom feed")
+    # A real feed with no items is just empty for now (a search with no
+    # news today), not an error.
     items = [i for el in root.iter() if _local(el.tag) in ("item", "entry") if (i := _item(el))]
-    if not items:
-        raise FeedError("no items in the feed")
     # Newest first when every item has a date; otherwise the feed's order.
     if all(i["_ts"] is not None for i in items):
         items.sort(key=lambda i: i["_ts"], reverse=True)
+    kept = []
+    seen: set[str] = set()
     for i in items:
         del i["_ts"]
-    return title, items[:limit]
+        # The same story twice (Google News lists it once per site).
+        key = " ".join(_fold(i["title"]).split())
+        if key in seen:
+            continue
+        seen.add(key)
+        text = _fold(f"{i['title']} {i['summary']}")
+        if include and not include.search(text):
+            continue
+        if exclude and exclude.search(text):
+            continue
+        kept.append(i)
+        if len(kept) == limit:
+            break
+    return title, kept

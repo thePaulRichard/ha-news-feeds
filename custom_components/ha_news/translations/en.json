@@ -5,21 +5,55 @@
     },
     "error": {
       "invalid_url": "Enter an address starting with http:// or https://.",
-      "cannot_read": "Couldn't read a news feed (RSS or Atom) at that address."
+      "cannot_read": "Couldn't read a news feed (RSS or Atom) at that address.",
+      "empty_query": "Enter what to search for.",
+      "long_query": "That search is too long (300 characters at most).",
+      "cannot_reach_google": "Couldn't reach Google News. Check the connection and try again."
     },
     "step": {
       "user": {
+        "title": "Add news",
+        "description": "One feed per entry: add News again for each source or search. The headlines show on the News ticker and News feed cards.",
+        "menu_options": {
+          "feed": "A feed address (RSS or Atom)",
+          "google": "A Google News search"
+        }
+      },
+      "feed": {
         "title": "Add a news feed",
-        "description": "One feed per entry: add News again for each source. The headlines show on the News ticker and News feed cards.",
         "data": {
           "name": "Name",
           "url": "Feed address (RSS or Atom)",
           "prefix": "Emoji before the source (optional)",
-          "items": "Headlines to keep"
+          "items": "Headlines to keep",
+          "include": "Only headlines with these words (optional)",
+          "exclude": "Leave out headlines with these words (optional)"
         },
         "data_description": {
           "name": "Shown on the cards. Leave empty to use the feed's own title.",
-          "prefix": "For example 🇮🇪 or 🌍"
+          "prefix": "For example 🇮🇪 or 🌍",
+          "include": "Separate words or phrases with commas, e.g. Dublin, Cork, home assistant. Matches whole words in the title or summary, ignoring capitals and accents. Empty = every headline.",
+          "exclude": "Separate with commas, e.g. football, celebrity. A headline with any of these is dropped."
+        }
+      },
+      "google": {
+        "title": "Add a Google News search",
+        "description": "Headlines from Google News about anything: a person, a place, a team, a topic.",
+        "data": {
+          "query": "Search",
+          "edition": "Edition",
+          "when": "Published",
+          "name": "Name",
+          "prefix": "Emoji before the source (optional)",
+          "items": "Headlines to keep",
+          "exclude": "Leave out headlines with these words (optional)"
+        },
+        "data_description": {
+          "query": "For example: home assistant, ram price, gpu stock. Use \"quotes\" for an exact phrase (\"home assistant\"), -word to leave a word out (ram price -phone), OR for either word (ram OR ssd), site: for one site (site:bbc.com).",
+          "edition": "The country and language of the news.",
+          "name": "Shown on the cards. Leave empty to use the search.",
+          "prefix": "For example 🇮🇪 or 🌍",
+          "exclude": "Separate with commas, e.g. football, celebrity. A headline with any of these is dropped."
         }
       }
     }
@@ -27,17 +61,53 @@
   "options": {
     "error": {
       "invalid_url": "Enter an address starting with http:// or https://.",
-      "cannot_read": "Couldn't read a news feed (RSS or Atom) at that address."
+      "cannot_read": "Couldn't read a news feed (RSS or Atom) at that address.",
+      "empty_query": "Enter what to search for.",
+      "long_query": "That search is too long (300 characters at most).",
+      "cannot_reach_google": "Couldn't reach Google News. Check the connection and try again."
     },
     "step": {
-      "init": {
+      "feed": {
         "title": "Feed settings",
         "description": "To rename the feed, use Rename in the entry's menu.",
         "data": {
           "url": "Feed address (RSS or Atom)",
           "prefix": "Emoji before the source (optional)",
-          "items": "Headlines to keep"
+          "items": "Headlines to keep",
+          "include": "Only headlines with these words (optional)",
+          "exclude": "Leave out headlines with these words (optional)"
+        },
+        "data_description": {
+          "include": "Separate words or phrases with commas, e.g. Dublin, Cork, home assistant. Matches whole words in the title or summary, ignoring capitals and accents. Empty = every headline.",
+          "exclude": "Separate with commas, e.g. football, celebrity. A headline with any of these is dropped."
         }
+      },
+      "google": {
+        "title": "Google News search",
+        "description": "To rename the feed, use Rename in the entry's menu.",
+        "data": {
+          "query": "Search",
+          "edition": "Edition",
+          "when": "Published",
+          "prefix": "Emoji before the source (optional)",
+          "items": "Headlines to keep",
+          "exclude": "Leave out headlines with these words (optional)"
+        },
+        "data_description": {
+          "query": "For example: home assistant, ram price, gpu stock. Use \"quotes\" for an exact phrase (\"home assistant\"), -word to leave a word out (ram price -phone), OR for either word (ram OR ssd), site: for one site (site:bbc.com).",
+          "edition": "The country and language of the news.",
+          "prefix": "For example 🇮🇪 or 🌍",
+          "exclude": "Separate with commas, e.g. football, celebrity. A headline with any of these is dropped."
+        }
+      }
+    }
+  },
+  "selector": {
+    "when": {
+      "options": {
+        "any": "Any time",
+        "1d": "Past day",
+        "7d": "Past week"
       }
     }
   }
