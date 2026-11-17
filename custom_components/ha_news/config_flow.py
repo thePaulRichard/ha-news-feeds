@@ -20,7 +20,7 @@ from homeassistant.helpers.selector import (
 )
 
 from .const import CONF_ITEMS, CONF_PREFIX, DEFAULT_ITEMS, DOMAIN, MAX_ITEMS
-from .coordinator import async_fetch
+from .coordinator import async_fetch, redact
 from .feed import FeedError
 
 _LOGGER = logging.getLogger(__name__)
@@ -47,7 +47,7 @@ async def _check(hass, user_input: dict) -> tuple[str, dict]:
     try:
         title, _ = await async_fetch(hass, url, 1)
     except FeedError as err:
-        _LOGGER.warning("Can't read %s: %s", url, err)
+        _LOGGER.warning("Can't read %s: %s", redact(url), err)
         return "", {"base": "cannot_read"}
     return title, {}
 

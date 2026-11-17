@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from urllib.parse import urlsplit
 
 import aiohttp
 
@@ -17,6 +18,18 @@ from .const import CONF_ITEMS, DEFAULT_ITEMS, DOMAIN, SCAN_INTERVAL, TIMEOUT
 from .feed import MAX_BYTES, FeedError, parse
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def redact(url: str) -> str:
+    """Scheme and host only, for logs: a private feed's address can carry
+    a token in its path, query or user part."""
+    try:
+        parts = urlsplit(url)
+        host = parts.hostname or ""
+        port = f":{parts.port}" if parts.port else ""
+    except ValueError:
+        return "<feed>"
+    return f"{parts.scheme}://{host}{port}" if host else "<feed>"
 
 
 async def async_fetch(hass: HomeAssistant, url: str, limit: int) -> tuple[str, list[dict]]:
@@ -35,7 +48,9 @@ async def async_fetch(hass: HomeAssistant, url: str, limit: int) -> tuple[str, l
                     if len(data) > MAX_BYTES:
                         raise FeedError("feed bigger than 5 MB")
     except (aiohttp.ClientError, TimeoutError) as err:
-        raise FeedError(f"can't fetch: {err or type(err).__name__}") from err
+        # aiohttp puts the full address in some errors (bad URL, redirects).
+        msg = str(err).replace(url, redact(url)) or type(err).__name__
+        raise FeedError(f"can't fetch: {msg}") from err
     data = bytes(data)
     return await hass.async_add_executor_job(parse, data, limit)
 
